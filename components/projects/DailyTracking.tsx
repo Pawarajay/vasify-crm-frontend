@@ -3,8 +3,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Calendar, AlertCircle, CheckCircle, Clock, Plus } from 'lucide-react';
 
-// const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://crm-backend-53w9.onrender.com/api';
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://vasify-crm-backend-4.onrender.com/api';
+// const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export default function DailyTracking({ project }) {
   const [entries, setEntries] = useState([]);

@@ -6988,7 +6988,7 @@ const refreshUsers = async () => {
     }
 
     const baseUrl =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
+      process.env.NEXT_PUBLIC_API_URL || "https://vasify-crm-backend-4.onrender.com"
 
     const response = await fetch(`${baseUrl}/api/users`, {
       headers: {
