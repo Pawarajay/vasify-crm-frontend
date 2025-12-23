@@ -1363,7 +1363,7 @@ const getStatusColor = (status: string) => {
 }
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"
+  process.env.NEXT_PUBLIC_BACKEND_URL || "https://vasify-crm-backend-4.onrender.com"
 
 // Helper function to convert logo URL to base64
 const getLogoBase64 = async (): Promise<string> => {
