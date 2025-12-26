@@ -1,3 +1,5 @@
+
+
 // "use client"
 
 // import { useState } from "react"
@@ -26,7 +28,7 @@
 //   { name: "Dashboard", href: "/", icon: LayoutDashboard },
 //   { name: "Customers", href: "/customers", icon: Users },
 //   { name: "Leads", href: "/leads", icon: UserPlus },
-//   { name: "Deals", href: "/deals", icon: TrendingUp },
+//   // { name: "Deals", href: "/deals", icon: TrendingUp },
 //   { name: "Tasks", href: "/tasks", icon: CheckSquare },
 //   { name: "Invoices", href: "/invoices", icon: FileText },
 //   { name: "Renewals", href: "/renewals", icon: RefreshCw },
@@ -126,7 +128,10 @@
 //   )
 // }
 
-//testing
+//24-12-2025
+
+
+
 "use client"
 
 import { useState } from "react"
@@ -139,15 +144,12 @@ import {
   LayoutDashboard,
   Users,
   UserPlus,
-  TrendingUp,
-  CheckSquare,
+  // TrendingUp, // Deals - commented out
   FileText,
   BarChart3,
-  MessageSquare,
   RefreshCw,
   ChevronLeft,
   ChevronRight,
-  Briefcase,
 } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 
@@ -155,13 +157,13 @@ const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Customers", href: "/customers", icon: Users },
   { name: "Leads", href: "/leads", icon: UserPlus },
-  // { name: "Deals", href: "/deals", icon: TrendingUp },
-  { name: "Tasks", href: "/tasks", icon: CheckSquare },
+  // { name: "Deals", href: "/deals", icon: TrendingUp }, // Projects, Tasks & WhatsApp - commented out
+  // { name: "Tasks", href: "/tasks", icon: CheckSquare }, // Projects, Tasks & WhatsApp - commented out
   { name: "Invoices", href: "/invoices", icon: FileText },
   { name: "Renewals", href: "/renewals", icon: RefreshCw },
   { name: "Reports", href: "/reports", icon: BarChart3 },
-  { name: "WhatsApp Automation", href: "/whatsapp", icon: MessageSquare },
-  { name: "Projects", href: "/projects", icon: Briefcase },
+  // { name: "WhatsApp Automation", href: "/whatsapp", icon: MessageSquare }, // Projects, Tasks & WhatsApp - commented out
+  // { name: "Projects", href: "/projects", icon: Briefcase }, // Projects, Tasks & WhatsApp - commented out
 ]
 
 export function Sidebar() {
