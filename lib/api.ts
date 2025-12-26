@@ -1070,8 +1070,8 @@
 //testing (19-12-2025)
 
 const API_BASE_URL =
-  // process.env.NEXT_PUBLIC_API_URL || "https://vasify-crm-backend-4.onrender.com/api";
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  process.env.NEXT_PUBLIC_API_URL || "https://vasify-crm-backend-4.onrender.com/api";
+  // process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 interface ApiResponse<T> {
   data?: T;
