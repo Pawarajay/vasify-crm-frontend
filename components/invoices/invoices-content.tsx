@@ -100,7 +100,9 @@ const getStatusColor = (status: string) => {
 }
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "https://vasify-crm-backend-4.onrender.com"
+  // process.env.NEXT_PUBLIC_BACKEND_URL || "https://vasify-crm-backend-4.onrender.com"
+  process.env.NEXT_PUBLIC_BACKEND_URL || "https://vasify-crm-backend-2.onrender.com"
+
   // process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"
 
 
