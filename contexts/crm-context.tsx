@@ -634,6 +634,67 @@ useEffect(() => {
     }
   }
 
+
+// const addCustomer = async (
+//   customerData: Omit<Customer, "id" | "createdAt" | "updatedAt">,
+// ): Promise<boolean> => {
+//   try {
+//     const payload = {
+//       ...customerData,
+//       totalValue:
+//         customerData.totalValue !== undefined &&
+//         customerData.totalValue !== null &&
+//         (customerData.totalValue as any) !== ""
+//           ? Number(customerData.totalValue)
+//           : 0,
+//     }
+
+//     const response = await customersApi.create(payload)
+//     console.log("CREATE CUSTOMER RESPONSE", response)
+
+//     if (response.customer) {
+//       const c = normalizeCustomer(response.customer)
+//       setCustomers((prev) => [c, ...prev])
+
+//       if (response.invoice) {
+//         const inv = response.invoice as any
+//         const normalizedInvoice: Invoice = {
+//           id: String(inv.id),
+//           customerId: c.id, // backend invoice doesn’t include it, so use new customer id
+//           customerName: c.name ?? "",
+//           invoiceNumber: inv.invoiceNumber ?? "",
+//           issueDate: c.createdAt ?? new Date(),
+//           dueDate: null,
+//           status: inv.status ?? "draft",
+//           amount:
+//             typeof inv.amount === "number"
+//               ? inv.amount
+//               : Number(inv.amount ?? 0) || 0,
+//           tax: 0,
+//           discount: 0,
+//           total:
+//             typeof inv.total === "number"
+//               ? inv.total
+//               : Number(inv.total ?? 0) || 0,
+//           notes: "",
+//           items: [],
+//           createdAt: new Date(),
+//           updatedAt: new Date(),
+//         }
+
+//         setInvoices((prev) => [normalizedInvoice, ...prev])
+//       }
+
+//       return true
+//     }
+
+//     return false
+//   } catch (err) {
+//     console.error("Failed to add customer:", err)
+//     throw err
+//   }
+// }
+
   const updateCustomer = async (
     id: string,
     customerData: Partial<Customer>,
