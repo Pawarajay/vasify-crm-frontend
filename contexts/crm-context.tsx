@@ -330,8 +330,8 @@ const refreshUsers = async () => {
     }
 
     const baseUrl =
-      process.env.NEXT_PUBLIC_API_URL || "https://vasify-crm-backend-2.onrender.com/api"
-      // process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
+      // process.env.NEXT_PUBLIC_API_URL || "https://vasify-crm-backend-2.onrender.com/api"
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
 
     const response = await fetch(`${baseUrl}/users`, {
       headers: {
@@ -607,93 +607,154 @@ useEffect(() => {
   }
 };
 
-  const addCustomer = async (
-    customerData: Omit<Customer, "id" | "createdAt" | "updatedAt">,
-  ): Promise<boolean> => {
-    try {
-      const payload = {
-        ...customerData,
-        totalValue:
-          customerData.totalValue !== undefined &&
-          customerData.totalValue !== null &&
-          customerData.totalValue !== ""
-            ? Number(customerData.totalValue)
-            : 0,
-      }
+  // const addCustomer = async (
+  //   customerData: Omit<Customer, "id" | "createdAt" | "updatedAt">,
+  // ): Promise<boolean> => {
+  //   try {
+  //     const payload = {
+  //       ...customerData,
+  //       totalValue:
+  //         customerData.totalValue !== undefined &&
+  //         customerData.totalValue !== null &&
+  //         customerData.totalValue !== ""
+  //           ? Number(customerData.totalValue)
+  //           : 0,
+  //     }
 
-      const response = await customersApi.create(payload)
-      if (response.customer) {
-        const c = normalizeCustomer(response.customer)
-        setCustomers((prev) => [c, ...prev])
-        return true
-      }
-      return false
-    } catch (err) {
-      console.error("Failed to add customer:", err)
-      throw err
+  //     const response = await customersApi.create(payload)
+  //     if (response.customer) {
+  //       const c = normalizeCustomer(response.customer)
+  //       setCustomers((prev) => [c, ...prev])
+  //       return true
+  //     }
+  //     return false
+  //   } catch (err) {
+  //     console.error("Failed to add customer:", err)
+  //     throw err
+  //   }
+  // }
+  
+//testing
+const normalizeRenewal = (raw: any): Renewal => ({
+  id: String(raw.id),
+  customerId: String(raw.customer_id ?? raw.customerId ?? ""),
+  service: raw.service ?? "",
+  amount:
+    typeof raw.amount === "number"
+      ? raw.amount
+      : Number(raw.amount ?? 0) || 0,
+  expiryDate:
+    toDate(raw.expiry_date ?? raw.expiryDate ?? raw.expiry_date ?? raw.expiryDate) ?? null,
+  status: raw.status ?? "active",
+  reminderDays:
+    typeof raw.reminder_days === "number"
+      ? raw.reminder_days
+      : typeof raw.reminderDays === "number"
+      ? raw.reminderDays
+      : Number(raw.reminder_days ?? raw.reminderDays ?? 30) || 30,
+  notes: raw.notes ?? "",
+  createdAt:
+    toDate(raw.created_at ?? raw.createdAt ?? raw.created_at ?? raw.createdAt) ?? new Date(),
+  updatedAt:
+    toDate(raw.updated_at ?? raw.updatedAt ?? raw.updated_at ?? raw.updatedAt) ?? new Date(),
+})
+
+const addCustomer = async (
+  customerData: Omit<Customer, "id" | "createdAt" | "updatedAt">,
+): Promise<boolean> => {
+  try {
+    const payload = {
+      ...customerData,
+      totalValue:
+        customerData.totalValue !== undefined &&
+        customerData.totalValue !== null &&
+        (customerData.totalValue as any) !== ""
+          ? Number(customerData.totalValue)
+          : 0,
     }
+
+    const response = await customersApi.create(payload)
+    console.log("CREATE CUSTOMER RESPONSE", response)
+
+    if (response.customer) {
+      const c = normalizeCustomer(response.customer)
+      setCustomers((prev) => [c, ...prev])
+
+      // Handle auto-generated invoice
+      if (response.invoice) {
+        const inv = response.invoice as any
+        const normalizedInvoice: Invoice = {
+          id: String(inv.id),
+          customerId: c.id,
+          customerName: c.name ?? "",
+          invoiceNumber: inv.invoiceNumber ?? "",
+          issueDate: c.createdAt ?? new Date(),
+          dueDate: null,
+          status: inv.status ?? "draft",
+          amount:
+            typeof inv.amount === "number"
+              ? inv.amount
+              : Number(inv.amount ?? 0) || 0,
+          tax: 0,
+          discount: 0,
+          total:
+            typeof inv.total === "number"
+              ? inv.total
+              : Number(inv.total ?? 0) || 0,
+          notes: "",
+          items: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
+
+        setInvoices((prev) => [normalizedInvoice, ...prev])
+      }
+
+      // ✅ AUTO-CREATE RENEWAL with default expiry (1 year from now)
+      const renewalAmount =
+        typeof customerData.recurringAmount === "number"
+          ? customerData.recurringAmount
+          : Number(customerData.recurringAmount ?? 0) || 0
+
+      const renewalService =
+        customerData.recurringService ||
+        customerData.service ||
+        customerData.serviceType ||
+        ""
+
+      const expiryDate = new Date()
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1) // 1 year from now
+
+      const renewalData = {
+        customerId: c.id,
+        service: renewalService,
+        amount: renewalAmount || Number(customerData.totalValue ?? 0),
+        expiryDate: expiryDate.toISOString().split("T")[0], // YYYY-MM-DD
+        status: "active",
+        reminderDays:
+          typeof customerData.defaultRenewalReminderDays === "number"
+            ? customerData.defaultRenewalReminderDays
+            : Number(customerData.defaultRenewalReminderDays ?? 30),
+        notes: customerData.defaultRenewalNotes || "",
+      }
+
+      try {
+        await addRenewal(renewalData as any)
+        console.log("Auto-created renewal for customer", c.id)
+      } catch (renewalErr) {
+        console.error("Failed to auto-create renewal:", renewalErr)
+        // Don't fail customer creation if renewal fails
+      }
+
+      return true
+    }
+
+    return false
+  } catch (err) {
+    console.error("Failed to add customer:", err)
+    throw err
   }
-
-
-// const addCustomer = async (
-//   customerData: Omit<Customer, "id" | "createdAt" | "updatedAt">,
-// ): Promise<boolean> => {
-//   try {
-//     const payload = {
-//       ...customerData,
-//       totalValue:
-//         customerData.totalValue !== undefined &&
-//         customerData.totalValue !== null &&
-//         (customerData.totalValue as any) !== ""
-//           ? Number(customerData.totalValue)
-//           : 0,
-//     }
-
-//     const response = await customersApi.create(payload)
-//     console.log("CREATE CUSTOMER RESPONSE", response)
-
-//     if (response.customer) {
-//       const c = normalizeCustomer(response.customer)
-//       setCustomers((prev) => [c, ...prev])
-
-//       if (response.invoice) {
-//         const inv = response.invoice as any
-//         const normalizedInvoice: Invoice = {
-//           id: String(inv.id),
-//           customerId: c.id, // backend invoice doesn’t include it, so use new customer id
-//           customerName: c.name ?? "",
-//           invoiceNumber: inv.invoiceNumber ?? "",
-//           issueDate: c.createdAt ?? new Date(),
-//           dueDate: null,
-//           status: inv.status ?? "draft",
-//           amount:
-//             typeof inv.amount === "number"
-//               ? inv.amount
-//               : Number(inv.amount ?? 0) || 0,
-//           tax: 0,
-//           discount: 0,
-//           total:
-//             typeof inv.total === "number"
-//               ? inv.total
-//               : Number(inv.total ?? 0) || 0,
-//           notes: "",
-//           items: [],
-//           createdAt: new Date(),
-//           updatedAt: new Date(),
-//         }
-
-//         setInvoices((prev) => [normalizedInvoice, ...prev])
-//       }
-
-//       return true
-//     }
-
-//     return false
-//   } catch (err) {
-//     console.error("Failed to add customer:", err)
-//     throw err
-//   }
-// }
+}
 
   const updateCustomer = async (
     id: string,
@@ -1245,29 +1306,62 @@ useEffect(() => {
   }
 
   // Renewal reminder CRUD
-  const addRenewalReminder = async (
-    reminderData: Omit<RenewalReminder, "id" | "createdAt" | "updatedAt">,
-  ): Promise<boolean> => {
-    try {
-      const response = await renewalsApi.createReminder(reminderData)
-      if (response.reminder) {
-        const rr = response.reminder as RenewalReminder
-        setRenewalReminders((prev) => [
-          ...prev,
-          {
-            ...rr,
-            createdAt: toDate(rr.createdAt) ?? rr.createdAt,
-            updatedAt: toDate(rr.updatedAt) ?? rr.updatedAt,
-          },
-        ])
-        return true
-      }
-      return false
-    } catch (err) {
-      console.error("Failed to add renewal reminder:", err)
-      return false
+  // const addRenewalReminder = async (
+  //   reminderData: Omit<RenewalReminder, "id" | "createdAt" | "updatedAt">,
+  // ): Promise<boolean> => {
+  //   try {
+  //     const response = await renewalsApi.createReminder(reminderData)
+  //     if (response.reminder) {
+  //       const rr = response.reminder as RenewalReminder
+  //       setRenewalReminders((prev) => [
+  //         ...prev,
+  //         {
+  //           ...rr,
+  //           createdAt: toDate(rr.createdAt) ?? rr.createdAt,
+  //           updatedAt: toDate(rr.updatedAt) ?? rr.updatedAt,
+  //         },
+  //       ])
+  //       return true
+  //     }
+  //     return false
+  //   } catch (err) {
+  //     console.error("Failed to add renewal reminder:", err)
+  //     return false
+  //   }
+  // }
+  //testing
+
+
+  const addRenewal = async (
+  renewalData: Omit<Renewal, "id" | "createdAt" | "updatedAt">,
+): Promise<boolean> => {
+  try {
+    // ✅ Auto-calculate expiry date from today + reminderDays
+    const reminderDays = renewalData.reminderDays ?? 30
+    const expiryDate = new Date()
+    expiryDate.setDate(expiryDate.getDate() + reminderDays)
+
+    const payload = {
+      ...renewalData,
+      expiryDate: expiryDate.toISOString().split("T")[0], // YYYY-MM-DD format
+      reminderDays,
     }
+
+    const response = await renewalsApi.create(payload)
+    console.log("CREATE RENEWAL RESPONSE", response)
+
+    if (response.renewal) {
+      const normalized = normalizeRenewal(response.renewal)
+      setRenewals((prev) => [normalized, ...prev])
+      return true
+    }
+
+    return false
+  } catch (err) {
+    console.error("Failed to add renewal:", err)
+    throw err
   }
+}
 
   const updateRenewalReminder = async (
     _id: string,
@@ -1283,29 +1377,44 @@ useEffect(() => {
   }
 
   // Renewal CRUD
-  const addRenewal = async (
-    renewalData: Omit<Renewal, "id" | "createdAt" | "updatedAt">,
-  ): Promise<boolean> => {
-    try {
-      const response = await renewalsApi.create(renewalData)
-      if (response.renewal) {
-        const r = response.renewal as Renewal
-        setRenewals((prev) => [
-          ...prev,
-          {
-            ...r,
-            createdAt: toDate(r.createdAt) ?? r.createdAt,
-            updatedAt: toDate(r.updatedAt) ?? r.updatedAt,
-          },
-        ])
-        return true
-      }
-      return false
-    } catch (err) {
-      console.error("Failed to add renewal:", err)
-      return false
-    }
-  }
+  // const addRenewal = async (
+  //   renewalData: Omit<Renewal, "id" | "createdAt" | "updatedAt">,
+  // ): Promise<boolean> => {
+  //   try {
+  //     const response = await renewalsApi.create(renewalData)
+  //     if (response.renewal) {
+  //       const r = response.renewal as Renewal
+  //       setRenewals((prev) => [
+  //         ...prev,
+  //         {
+  //           ...r,
+  //           createdAt: toDate(r.createdAt) ?? r.createdAt,
+  //           updatedAt: toDate(r.updatedAt) ?? r.updatedAt,
+  //         },
+  //       ])
+  //       return true
+  //     }
+  //     return false
+  //   } catch (err) {
+  //     console.error("Failed to add renewal:", err)
+  //     return false
+  //   }
+  // }
+
+//   const addRenewal = async (renewalData: Omit<Renewal, "id" | "createdAt" | "updatedAt">) => {
+//   try {
+//     const response = await renewalsApi.create(renewalData)
+//     if (response.renewal) {
+//       const normalized = normalizeRenewal(response.renewal)
+//       setRenewals((prev) => [normalized, ...prev])
+//       return true
+//     }
+//     return false
+//   } catch (err) {
+//     console.error("Failed to add renewal:", err)
+//     throw err
+//   }
+// }
 
   const updateRenewal = async (
     id: string,
@@ -1378,7 +1487,7 @@ useEffect(() => {
     addInvoice,
     updateInvoice,
     deleteInvoice,
-    addRenewalReminder,
+    // renewalReminders,
     updateRenewalReminder,
     deleteRenewalReminder,
     addRenewal,

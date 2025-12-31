@@ -1,6 +1,6 @@
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://vasify-crm-backend-2.onrender.com/api";
-  // process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  // process.env.NEXT_PUBLIC_API_URL || "https://vasify-crm-backend-2.onrender.com/api";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 interface ApiResponse<T> {
   data?: T;
@@ -48,6 +48,39 @@ export const getAuthToken = (): string | null => {
 export const isAuthenticated = () => !!getAuthToken();
 
 // API request wrapper
+// async function apiRequest<T>(
+//   endpoint: string,
+//   options: RequestInit = {},
+// ): Promise<T> {
+//   const token = getAuthToken();
+
+//   const config: RequestInit = {
+//     ...options,
+//     headers: {
+//       "Content-Type": "application/json",
+//       ...(options.headers || {}),
+//       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+//     },
+//   };
+
+//   try {
+//     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+
+//     if (!response.ok) {
+//       const errorData = await response.json().catch(() => ({}));
+//       throw new Error(
+//         errorData.error || errorData.message || `HTTP ${response.status}`,
+//       );
+//     }
+
+//     return await response.json();
+//   } catch (error) {
+//     console.error("API Request Error:", error);
+//     throw error;
+//   }
+// }
+
+
 async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {},
@@ -68,6 +101,24 @@ async function apiRequest<T>(
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      
+      // ✅ Log complete error details
+      console.error("API Error Status:", response.status);
+      console.error("API Error Data:", JSON.stringify(errorData, null, 2));
+      console.error("API Error Details:", {
+        error: errorData.error,
+        message: errorData.message,
+        errors: errorData.errors,
+      });
+
+      // Show all validation errors if they exist
+      if (errorData.errors && Array.isArray(errorData.errors)) {
+        const validationErrors = errorData.errors
+          .map((e: any) => `${e.param}: ${e.msg}`)
+          .join(", ");
+        throw new Error(`Validation failed: ${validationErrors}`);
+      }
+
       throw new Error(
         errorData.error || errorData.message || `HTTP ${response.status}`,
       );
@@ -79,6 +130,7 @@ async function apiRequest<T>(
     throw error;
   }
 }
+
 
 // Auth API
 export const authApi = {
@@ -524,6 +576,8 @@ export const renewalsApi = {
     }>("/renewals/stats/overview");
   },
 };
+
+//testing
 
 
 //testing 30-12-2025
