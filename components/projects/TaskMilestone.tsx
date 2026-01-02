@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Plus, CheckCircle, Clock, AlertTriangle, Flag } from 'lucide-react';
 
 // const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://crm-backend-53w9.onrender.com/api';
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://crm-api.vasifytech.com/api';
 
 export default function TaskMilestone({ projectId }) {
   const [tasks, setTasks] = useState([]);

@@ -2,7 +2,7 @@ import axios from "axios"
 import { getAuthToken } from "./api"
 
 const axiosClient = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "https://crm-api.vasifytech.com/api",
 })
 
 axiosClient.interceptors.request.use((config) => {

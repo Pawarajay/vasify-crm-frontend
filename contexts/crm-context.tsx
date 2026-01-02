@@ -330,7 +330,7 @@ const refreshUsers = async () => {
     }
 
     const baseUrl =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
+      process.env.NEXT_PUBLIC_API_URL || "https://crm-api.vasifytech.com/api"
 
     const response = await fetch(`${baseUrl}/users`, {
       headers: {
