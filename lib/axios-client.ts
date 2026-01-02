@@ -2,7 +2,6 @@ import axios from "axios"
 import { getAuthToken } from "./api"
 
 const axiosClient = axios.create({
-  // baseURL: "https://vasify-crm-backend-2.onrender.com/api",
   baseURL: "http://localhost:5000/api",
 })
 

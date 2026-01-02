@@ -330,7 +330,6 @@ const refreshUsers = async () => {
     }
 
     const baseUrl =
-      // process.env.NEXT_PUBLIC_API_URL || "https://vasify-crm-backend-2.onrender.com/api"
       process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
 
     const response = await fetch(`${baseUrl}/users`, {
@@ -1329,7 +1328,7 @@ const addCustomer = async (
   //     return false
   //   }
   // }
-  //testing
+  
 
 
   const addRenewal = async (

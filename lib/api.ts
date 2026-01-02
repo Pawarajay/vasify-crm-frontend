@@ -1,5 +1,4 @@
 const API_BASE_URL =
-  // process.env.NEXT_PUBLIC_API_URL || "https://vasify-crm-backend-2.onrender.com/api";
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 interface ApiResponse<T> {
