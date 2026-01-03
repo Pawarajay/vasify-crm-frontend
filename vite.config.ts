@@ -8,6 +8,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8004,
+    allowedHosts: ['crm-new.vasifytech.com','www.crm-new.vasifytech.com', 'crm-new.vasifytech'],
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
